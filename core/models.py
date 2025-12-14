@@ -13,9 +13,17 @@ class Products(models.Model):
         (NORMAL_FOLDING, 'Normal'),
         (AMRITHA_FOLDING, 'Amritha'),
     )
+    TIE_2 = 1
+    TIE_4X6 = 2
+    TIES_CHOICES=(
+        (TIE_2, "2"),
+        (TIE_4X6, "4/6"),
+    )
     name = models.CharField(max_length=100)
     reinforcement = models.PositiveSmallIntegerField(choices=REINFORCEMENTS)
     folding = models.PositiveSmallIntegerField(choices=FOLDS)
+    ties = models.PositiveSmallIntegerField(choices=TIES_CHOICES)
+
     default = models.BooleanField(default=True)
 
     def __str__(self):
