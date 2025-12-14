@@ -7,7 +7,7 @@ from ..base_views import BaseDeleteView
 
 
 class ProductListView(ListView):
-    model = Products
+    queryset = Products.objects.filter(default=True)
     template_name = 'products/list.html'
     context_object_name = 'products'
 
