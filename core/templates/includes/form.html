@@ -1,0 +1,281 @@
+{% load widget_tweaks %}
+
+<form method="{{ method|default:'post' }}"
+      action="{{ action|default:'' }}"
+      enctype="{{ enctype|default:'multipart/form-data' }}"
+      class="needs-validation"
+      novalidate
+      id="main-form">
+
+    {% csrf_token %}
+
+    {# General errors #}
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
+            <strong>Please correct the following errors:</strong>
+            {% for e in form.non_field_errors %}
+                <div class="mt-1">{{ e }}</div>
+            {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endif %}
+
+    {# Normal fields #}
+    {% for field in form.visible_fields %}
+        <div class="mb-3">
+
+            <label class="form-label" for="{{ field.id_for_label }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                    <span class="text-danger">*</span>
+                {% endif %}
+            </label>
+
+            {% if field|widget_type == "checkboxinput" %}
+                <div class="form-check">
+                    {% render_field field class+="form-check-input" %}
+                    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
+
+            {% elif field|widget_type == "select" %}
+                {% render_field field class+="form-select" %}
+
+            {% elif field|widget_type == "textarea" %}
+                {% render_field field class+="form-control" rows="3" %}
+
+            {% else %}
+                {% render_field field class+="form-control" %}
+            {% endif %}
+
+            {% if field.help_text %}
+                <div class="form-text">{{ field.help_text|safe }}</div>
+            {% endif %}
+
+            {% for e in field.errors %}
+                <div class="invalid-feedback d-block">{{ e }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Hidden fields #}
+    {% for h in form.hidden_fields %}
+        {{ h }}
+    {% endfor %}
+
+
+    {#    ---------------------------------------------------------#}
+    {#    FORMSET SECTION#}
+    {#    ---------------------------------------------------------#}
+    {% if formset %}
+        <hr class="my-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">{{ formset_title|default:"Additional Items" }}</h5>
+            <span class="badge bg-secondary" id="formset-count">0 items</span>
+        </div>
+
+        {{ formset.management_form }}
+
+        {% if formset.non_form_errors %}
+            <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+        {% endif %}
+
+        <div id="formset-wrapper">
+            {% for f in formset %}
+                <div class="formset-item card border-0 shadow-sm mb-3 p-3" data-idx="{{ forloop.counter0 }}">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-muted mb-0">
+                            <i class="bi bi-grip-vertical me-2"></i>
+                            {{ formset_item_name|default:"Item" }} {{ forloop.counter }}
+                        </h6>
+
+                        {% if remove_btn %}
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-form">
+                                <i class="bi bi-trash"></i> Remove
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {% for field in f.visible_fields %}
+                        <div class="mb-3">
+                            {% if field|widget_type == "checkboxinput" %}
+                                <div class="form-check">
+                                    {% render_field field class+="form-check-input" %}
+                                    <label class="form-check-label"
+                                           for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                </div>
+                            {% elif field|widget_type == "select" %}
+                                <label class="form-label">{{ field.label }}</label>
+                                {% render_field field class+="form-select" %}
+
+                            {% elif field|widget_type == "textarea" %}
+                                <label class="form-label">{{ field.label }}</label>
+                                {% render_field field class+="form-control" rows="3" %}
+
+                            {% else %}
+                                <label class="form-label">{{ field.label }}</label>
+                                {% render_field field class+="form-control" %}
+                            {% endif %}
+
+                            {% for e in field.errors %}
+                                <div class="invalid-feedback d-block">{{ e }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" id="add-form" class="btn btn-outline-dark btn-sm mb-3">
+            <i class="bi bi-plus-circle"></i> Add {{ formset_item_name|default:"Item" }}
+        </button>
+    {% endif %}
+
+    <hr class="my-4">
+
+    <div class="d-flex justify-content-end gap-2">
+        {% if show_secondary_btn %}
+            <a href="{{ secondary_btn_url|default:'javascript:history.back()' }}"
+               class="btn btn-outline-secondary">
+                {{ secondary_btn_label|default:"Cancel" }}
+            </a>
+        {% endif %}
+
+        <button type="submit" class="btn btn-dark px-4" id="submit-btn">
+            <span class="submit-text">{{ submit_label|default:"Submit" }}</span>
+            <span class="spinner-border spinner-border-sm ms-2 d-none"></span>
+        </button>
+    </div>
+</form>
+
+
+{#---------------------------------------------------------#}
+{#FORMSET JAVASCRIPT#}
+{#---------------------------------------------------------#}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        /* --------------------------------------------
+           Submit button
+        ---------------------------------------------*/
+        const form = document.getElementById("main-form");
+        const submitBtn = document.getElementById("submit-btn");
+
+        form.addEventListener("submit", () => {
+            submitBtn.disabled = true;
+            submitBtn.querySelector(".submit-text").textContent = "Submitting...";
+            submitBtn.querySelector(".spinner-border").classList.remove("d-none");
+        });
+
+
+        /* --------------------------------------------
+           Formset logic
+        ---------------------------------------------*/
+        {% if formset %}
+            const wrapper = document.getElementById("formset-wrapper");
+            const addBtn = document.getElementById("add-form");
+            const prefix = "{{ formset.prefix }}";
+            const totalInput = document.getElementById("id_" + prefix + "-TOTAL_FORMS");
+            const emptyTemplate = `{{ formset.empty_form.as_p|escapejs }}`;
+            const countBadge = document.getElementById("formset-count");
+
+            function updateCount() {
+                const count = wrapper.querySelectorAll(".formset-item").length;
+                countBadge.textContent = count + " item" + (count !== 1 ? "s" : "");
+            }
+
+            function renumber() {
+                wrapper.querySelectorAll(".formset-item").forEach((item, i) => {
+                    item.dataset.idx = i;
+                    item.querySelector("h6").innerHTML =
+                        `<i class="bi bi-grip-vertical me-2"></i> Item ${i + 1}`;
+                });
+            }
+
+            function bindRemoveButtons() {
+                wrapper.querySelectorAll(".remove-form").forEach(btn => {
+                    btn.onclick = () => {
+                        if (!confirm("Remove this item?")) return;
+
+                        const item = btn.closest(".formset-item");
+                        item.classList.add("fade-out");
+                        setTimeout(() => {
+                            item.remove();
+                            renumber();
+                            updateCount();
+                        }, 250);
+                    };
+                });
+            }
+
+            addBtn.addEventListener("click", () => {
+                let count = parseInt(totalInput.value);
+
+                let html = emptyTemplate.replace(/__prefix__/g, count);
+
+                const div = document.createElement("div");
+                div.className = "formset-item card border-0 shadow-sm p-3 mb-3 new-item";
+                div.dataset.idx = count;
+                div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-muted mb-0">
+                    <i class="bi bi-grip-vertical me-2"></i> Item ${count + 1}
+                </h6>
+                {% if remove_btn %}
+                <button type="button" class="btn btn-sm btn-outline-danger remove-form">
+                    <i class="bi bi-trash"></i> Remove
+                </button>
+                {% endif %}
+            </div>
+            ${html}
+        `;
+
+                wrapper.appendChild(div);
+                totalInput.value = count + 1;
+
+                bindRemoveButtons();
+                updateCount();
+
+                div.scrollIntoView({behavior: "smooth"});
+            });
+
+            bindRemoveButtons();
+            updateCount();
+        {% endif %}
+    });
+</script>
+
+<style>
+    .formset-item.new-item {
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fade-out {
+        animation: fadeOut 0.25s ease-out forwards;
+    }
+
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+    }
+</style>

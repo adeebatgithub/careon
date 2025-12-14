@@ -1,0 +1,108 @@
+{% extends "includes/base.html" %}
+{% load static %}
+
+{% block navbar_title %}
+    Orders
+{% endblock %}
+{% block navbar_btns %}
+    <a href="{% url 'order:create' %}" class="btn btn-outline-dark btn-sm me-2">
+        <i class="bi bi-plus-lg"></i> Add Order
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid px-4 py-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-nowrap align-middle mb-0">
+                            <thead class="bg-light text-secondary small text-uppercase">
+                            <tr>
+                                <th class="ps-4">Order Name</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for order in orders %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="bg-primary-subtle rounded d-flex align-items-center justify-content-center"
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-receipt text-primary"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0 fw-semibold text-dark">{{ order.name }}</h6>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a href="{% url 'order:detail' order.pk %}"
+                                               class="btn btn-sm btn-light"
+                                               data-bs-toggle="tooltip" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'order:delete' order.pk %}"
+                                               class="btn btn-sm btn-light"
+                                               onclick="return confirm('Are you sure you want to delete {{ order.name }}?');"
+                                               data-bs-toggle="tooltip" title="Delete">
+                                                <i class="bi bi-trash text-danger"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if is_paginated %}
+                        <div class="card-footer bg-white border-top-0 d-flex justify-content-end py-3">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-sm mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                        </li>
+                                    {% endif %}
+                                    <li class="page-item disabled"><a class="page-link"
+                                                                      href="#">Page {{ page_obj.number }}
+                                        of {{ page_obj.paginator.num_pages }}</a></li>
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?page={{ page_obj.next_page_number }}">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-muted">No orders found</h5>
+                        <p class="text-muted small mb-3">Get started by adding your first order.</p>
+                        <a href="{% url 'order:create' %}" class="btn btn-primary btn-sm">Add Order
+                            Now</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+{% endblock %}

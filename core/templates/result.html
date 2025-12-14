@@ -1,0 +1,53 @@
+{% extends "includes/base.html" %}
+
+{% block content %}
+    <div class="d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+        <div class="text-center">
+            <!-- Animated Icon -->
+            <div class="mb-4 position-relative">
+                <div class="spinner-border text-primary" role="status" style="width: 4rem; height: 4rem; opacity: 0.2;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <i class="bi bi-tools position-absolute top-50 start-50 translate-middle text-primary"
+                   style="font-size: 2rem;"></i>
+            </div>
+
+            <!-- Main Message -->
+            <h2 class="fw-bold mb-3">We're Working On It</h2>
+            <p class="text-muted mb-4" style="max-width: 400px; margin: 0 auto;">
+                This feature is currently under development. We're building something great and it will be ready soon!
+            </p>
+
+            <!-- Progress Indicator -->
+            <div class="d-flex justify-content-center gap-2 mb-4">
+{#                <span class="badge bg-success-subtle text-success border border-success">Planning</span>#}
+{#                <span class="badge bg-primary-subtle text-primary border border-primary">In Progress</span>#}
+                <span class="badge bg-light text-muted border">Coming Soon</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="javascript:history.back()" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Go Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.3;
+            }
+        }
+
+        .spinner-border {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+{% endblock %}

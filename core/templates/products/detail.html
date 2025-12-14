@@ -1,0 +1,127 @@
+{% extends "backpanel/includes/base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block navbar_title %}
+    Products Inventory / {{ product.name }}
+{% endblock %}
+{% block navbar_btns %}
+    <a href="{% url 'backpanel:products-list' %}" class="btn btn-outline-dark btn-sm me-2">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid px-4 py-4">
+
+        <!-- Product Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="row g-0">
+                <!-- Product Image -->
+                <div class="col-md-4 text-center p-4">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm">
+                    {% else %}
+                        <img src="{% static 'images/no-image.png' %}" alt="No Image"
+                             class="img-fluid rounded shadow-sm">
+                    {% endif %}
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-md-8 p-4">
+                    <h3 class="fw-bold mb-2">{{ product.name }}</h3>
+
+                    {% if product.brand %}
+                        <p class="text-muted mb-1"><strong>Brand:</strong> {{ product.brand }}</p>
+                    {% endif %}
+                    {% if product.category %}
+                        <p class="text-muted mb-1"><strong>Category:</strong> {{ product.category.name }}</p>
+                    {% endif %}
+                    {% if product.sku %}
+                        <p class="text-muted mb-1">
+                            <strong>SKU:</strong> {{ product.sku.code }} ({{ product.sku.unit }})
+                        </p>
+                    {% endif %}
+
+                    <hr class="my-3">
+
+                    <p class="mb-1"><strong>Selling Price:</strong> ₹{{ product.selling_price|floatformat:2|intcomma }}
+                    </p>
+                    {% if product.cost_price %}
+                        <p class="mb-1"><strong>Cost Price:</strong> ₹{{ product.cost_price|floatformat:2|intcomma }}
+                        </p>
+                    {% endif %}
+                    <p class="mb-1"><strong>Minimum Stock Level:</strong> {{ product.minimum_stock_level }}</p>
+                    <p class="mb-1"><strong>Quantity in Stock:</strong> {{ product.stock_level|default:"0" }}</p>
+                    <p class="mb-0"><strong>Last
+                        Restocked:</strong> {{ stock_history.last.last_restocked|date:"d M, Y h:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock History Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Stock History</h5>
+                <a href="{% url 'backpanel:stock-create' %}?i={{ product.id }}&pre=detail"
+                   class="btn btn-sm btn-outline-dark d-flex align-items-center gap-1">
+                    <i class="bi bi-plus-lg"></i> Add
+                </a>
+            </div>
+
+            <div class="card-body p-0">
+                {% if stock_history.exists %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-nowrap align-middle mb-0">
+                            <thead class="bg-light text-secondary small text-uppercase">
+                            <tr>
+                                <th class="ps-4" style="width:5%">#</th>
+                                <th style="width:25%">Quantity</th>
+                                <th style="width:40%">Stocked At</th>
+                                <th class="text-end pe-4" style="width:20%">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for item in stock_history %}
+                                <tr>
+                                    <td class="ps-4">{{ forloop.counter }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.last_restocked|date:"d M, Y h:i" }}</td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a href="{% url 'backpanel:stock-update' item.pk %}"
+                                               class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Edit Stock">
+                                                <i class="bi bi-pencil text-primary"></i>
+                                            </a>
+                                            <a href="{% url 'backpanel:stock-delete' item.pk %}"
+                                               class="btn btn-sm btn-light"
+                                               onclick="return confirm('Are you sure you want to delete this record?');"
+                                               data-bs-toggle="tooltip" title="Delete Stock">
+                                                <i class="bi bi-trash text-danger"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-box-seam" style="font-size:2rem;"></i>
+                        <p class="mb-0">No stock records available for this product.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+{% endblock %}
