@@ -23,6 +23,7 @@
                                 <th class="ps-4">Product Name</th>
                                 <th>Reinforcement</th>
                                 <th>Folding Type</th>
+                                <th>Ties</th>
                                 <th class="text-end pe-4">Actions</th>
                             </tr>
                             </thead>
@@ -51,6 +52,21 @@
                                         {% else %}
                                             <span class="badge bg-light text-dark border">
                                                 Normal
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if product.ties == 1 %}
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                                <i class="bi bi-link-45deg me-1"></i> Tie 2
+                                            </span>
+                                        {% elif product.ties == 2 %}
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                <i class="bi bi-link-45deg me-1"></i> Tie 4/6
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                <i class="bi bi-dash-circle me-1"></i> No Ties
                                             </span>
                                         {% endif %}
                                     </td>
@@ -108,6 +124,20 @@
                                                 {% else %}
                                                     <span class="badge bg-light text-dark border">
                                                         <i class="bi bi-folder2 me-1"></i> Normal
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if product.ties == 1 %}
+                                                    <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                                        <i class="bi bi-link-45deg me-1"></i> Tie 2
+                                                    </span>
+                                                {% elif product.ties == 2 %}
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                        <i class="bi bi-link-45deg me-1"></i> Tie 4/6
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                                        <i class="bi bi-dash-circle me-1"></i> No Ties
                                                     </span>
                                                 {% endif %}
                                             </div>

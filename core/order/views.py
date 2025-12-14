@@ -39,10 +39,25 @@ class OrderProductCreateView(CreateView):
     form_class = OrderProductForm
     template_name = 'order/select.html'
 
+    @staticmethod
+    def get_products():
+        products = Products.objects.all()
+        products_data = {
+            str(p.id): {
+                'name': p.name,
+                'reinforcement': p.get_reinforcement_display(),
+                'folding': p.get_folding_display(),
+                'ties': p.get_ties_display(),
+            } for p in products
+        }
+        return products_data
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update({
             "pk": self.kwargs["pk"],
+            "products": Products.objects.all(),
+            "products_json": self.get_products(),
         })
         return context
 
