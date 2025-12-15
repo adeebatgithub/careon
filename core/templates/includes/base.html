@@ -16,6 +16,39 @@
 </head>
 <body class="bg-light">
 
+<!-- Fullscreen Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <img src="{% static 'bg.webp' %}" alt="Loading" class="loading-image">
+    <div class="green-overlay"></div>
+    <div class="loading-content">
+        <img src="{% static 'logo.webp' %}" alt="Logo" class="loading-logo">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="vision-mission-card">
+                        <div class="card-icon">
+                            <i class="bi bi-eye"></i>
+                        </div>
+                        <h3 class="card-title">Our Vision</h3>
+                        <p class="card-description">To be the leading innovator in our industry, creating exceptional
+                            value for our customers.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="vision-mission-card">
+                        <div class="card-icon">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <h3 class="card-title">Our Mission</h3>
+                        <p class="card-description">Delivering excellence through quality products and outstanding
+                            service.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid">
     <div class="row">
 
@@ -100,6 +133,175 @@
 </div>
 
 <style>
+    /* Loading Overlay Styles */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+    }
+
+    .loading-overlay.fade-out {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .loading-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .green-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 128, 0, 0.3);
+        pointer-events: none;
+    }
+
+    .loading-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 10;
+        color: white;
+        width: 90%;
+        max-width: 1000px;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .loading-logo {
+        max-width: 280px;
+        max-height: 280px;
+        margin-bottom: 3rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+        animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .vision-mission-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+        height: 100%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .vision-mission-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        letter-spacing: 0.5px;
+    }
+
+    .card-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        font-weight: 300;
+        margin: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .loading-logo {
+            max-width: 140px;
+            max-height: 140px;
+            margin-bottom: 2rem;
+        }
+
+        .vision-mission-card {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .loading-logo {
+            max-width: 120px;
+            max-height: 120px;
+            margin-bottom: 1.5rem;
+        }
+
+        .vision-mission-card {
+            padding: 1.25rem;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
     /* Desktop Sidebar */
     @media (min-width: 992px) {
         .sidebar-fixed {
@@ -221,6 +423,17 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Loading Overlay Logic
+        const overlay = document.getElementById('loadingOverlay');
+
+        setTimeout(function () {
+            overlay.classList.add('fade-out');
+            // Remove overlay from DOM after fade transition
+            setTimeout(function () {
+                overlay.remove();
+            }, 500);
+        }, 5000); // 5 seconds
+
         // Toast Logic
         document.querySelectorAll('.toast').forEach(function (toastEl) {
             new bootstrap.Toast(toastEl).show();
