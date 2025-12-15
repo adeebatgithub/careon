@@ -244,8 +244,8 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .loading-logo {
-            max-width: 140px;
-            max-height: 140px;
+            max-width: 240px;
+            max-height: 240px;
             margin-bottom: 2rem;
         }
 
@@ -269,8 +269,8 @@
 
     @media (max-width: 576px) {
         .loading-logo {
-            max-width: 120px;
-            max-height: 120px;
+            max-width: 220px;
+            max-height: 220px;
             margin-bottom: 1.5rem;
         }
 
@@ -423,16 +423,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Loading Overlay Logic
         const overlay = document.getElementById('loadingOverlay');
+        const hasVisited = localStorage.getItem('hasVisitedSite');
 
-        setTimeout(function () {
-            overlay.classList.add('fade-out');
-            // Remove overlay from DOM after fade transition
+        if (!hasVisited) {
+            // FIRST TIME VISIT → show overlay
+            localStorage.setItem('hasVisitedSite', 'true');
+
             setTimeout(function () {
-                overlay.remove();
-            }, 500);
-        }, 5000); // 5 seconds
+                overlay.classList.add('fade-out');
+
+                setTimeout(function () {
+                    overlay.remove();
+                }, 500);
+            }, 5000); // 5 seconds
+        } else {
+            // NOT first visit → remove immediately
+            overlay.remove();
+        }
 
         // Toast Logic
         document.querySelectorAll('.toast').forEach(function (toastEl) {
@@ -455,6 +463,7 @@
         }
     });
 </script>
+
 
 {% block extra_js %}{% endblock %}
 </body>
