@@ -424,11 +424,11 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const overlay = document.getElementById('loadingOverlay');
-        const hasVisited = localStorage.getItem('hasVisitedSite');
+        const hasLoaded = sessionStorage.getItem('hasLoadedOnce');
 
-        if (!hasVisited) {
-            // FIRST TIME VISIT → show overlay
-            localStorage.setItem('hasVisitedSite', 'true');
+        if (!hasLoaded) {
+            // FIRST LOAD of session
+            sessionStorage.setItem('hasLoadedOnce', 'true');
 
             setTimeout(function () {
                 overlay.classList.add('fade-out');
@@ -438,7 +438,7 @@
                 }, 500);
             }, 5000); // 5 seconds
         } else {
-            // NOT first visit → remove immediately
+            // Already loaded in this session
             overlay.remove();
         }
 
@@ -447,7 +447,7 @@
             new bootstrap.Toast(toastEl).show();
         });
 
-        // Keep Sidebar Scroll Position (Desktop only)
+        // Sidebar scroll memory
         const sidebar = document.querySelector('.sidebar-fixed');
         const scrollKey = 'sidebarScrollPosition';
 
@@ -463,6 +463,7 @@
         }
     });
 </script>
+
 
 
 {% block extra_js %}{% endblock %}
