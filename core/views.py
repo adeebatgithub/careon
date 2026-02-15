@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 
 from core.models import Products, Orders, OrderProducts
-from .calc import number_of_workers, next_even
+from .calc import number_of_workers, next_even, total_number_of_workers
 
 
 class IndexView(RedirectView):
@@ -126,16 +126,16 @@ class DemandResult(TemplateView):
 
     def get_demand(self):
         product = self.get_product()
-        workers = number_of_workers(
-            demand=1,
-            nos_tie=product.product.ties,
-            folding_type=product.product.folding,
-            attached=product.product.reinforcement
-        )
-        total_std_time = 0
-        for activity, counts in workers.items():
-            total_std_time += (counts["_std_time"] / 480) * self.get_mul_factor(activity, product.product.folding)
-        return product.demand / total_std_time
+        for n in range(1, 99999):
+            workers = total_number_of_workers(
+                demand=n,
+                nos_tie=product.product.ties,
+                folding_type=product.product.folding,
+                attached=product.product.reinforcement
+            )
+            if workers >= product.demand + 1:
+                return n
+        return 0
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
