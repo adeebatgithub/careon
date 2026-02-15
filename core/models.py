@@ -1,5 +1,8 @@
 from django.db import models
 
+from core.calc import total_number_of_workers
+
+
 class Products(models.Model):
     ATTACHED=1
     NOT_ATTACHED=0

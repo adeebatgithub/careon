@@ -1,7 +1,12 @@
+import math
+from collections import defaultdict
+
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 
-from core.models import Products
+from core.models import Products, Orders, OrderProducts
+from .calc import number_of_workers, next_even
 
 
 class IndexView(RedirectView):
@@ -37,5 +42,78 @@ class IndexView(RedirectView):
         return super().get(request, *args, **kwargs)
 
 
-class CalculateView(TemplateView):
+class ResultView(TemplateView):
     template_name = "result.html"
+
+    def get_order(self):
+        return get_object_or_404(Orders, pk=self.kwargs['pk'])
+
+    def get_products(self):
+        return OrderProducts.objects.filter(order=self.get_order())
+
+    def total_number_of_workers_per_activity(self):
+        workers_per_activity = defaultdict(lambda: {"default": 0.0, "required": 0.0})
+
+        for product in self.get_products():
+            workers = number_of_workers(
+                demand=product.demand,
+                nos_tie=product.product.ties,
+                folding_type=product.product.folding,
+                attached=product.product.reinforcement
+            )
+
+            for activity, counts in workers.items():
+                workers_per_activity[activity]["required"] += counts["required"]
+                workers_per_activity[activity]["default"] = counts["default"]
+
+        rounded_total = {}
+        for activity, counts in workers_per_activity.items():
+            name = activity.replace("_", " ").title()
+            rounded_total[name] = {
+                "required": math.ceil(counts["required"]),
+                "default": counts["default"],
+            }
+
+        for activity in ("welcrow_attachment", "reinforcement_attachment", "tie_attachment"):
+            name = activity.replace("_", " ").title()
+            if name in rounded_total:
+                rounded_total[name]["required"] = next_even(rounded_total[name]["required"])
+
+        return rounded_total
+
+    def total_number_of_workers(self):
+        number_of_workers_per_activity = self.total_number_of_workers_per_activity()
+        total = 0
+        for activity, counts in number_of_workers_per_activity.items():
+            total += counts["required"]
+
+        return total
+
+    def overtime(self):
+        total_std_time_product = defaultdict(float)
+        total_time = 0
+        for product in self.get_products():
+            workers = number_of_workers(
+                demand=product.demand,
+                nos_tie=product.product.ties,
+                folding_type=product.product.folding,
+                attached=product.product.reinforcement
+            )
+
+            for activity, counts in workers.items():
+                total_std_time_product[product.product.name] += counts["_std_time"]
+
+            total_time = total_time + (total_std_time_product[product.product.name] * product.demand)
+
+        print((total_time - (105 * 480)) / 105)
+        return math.ceil((total_time - (105 * 480)) / 105)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "total_number_of_workers": self.total_number_of_workers(),
+            "order": self.get_order(),
+            "workers": self.total_number_of_workers_per_activity(),
+            "overtime": self.overtime(),
+        })
+        return context
