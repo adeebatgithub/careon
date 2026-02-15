@@ -1,0 +1,73 @@
+{% extends 'includes/base.html' %}
+{% load static %}
+{% load mathfilters %}
+{% load humanize %} {# Added for comma separation in numbers #}
+
+{% block navbar_title %}
+    <span class="text-muted fw-light">Find Demand /</span> <span class="fw-bold">Calculation Result</span>
+{% endblock %}
+
+{% block navbar_btns %}
+    <a href="{% url 'demand:list' %}" class="btn btn-outline-secondary btn-sm me-2">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h5 class="mb-0"><i class="bi bi-calculator-fill me-2"></i>Production Capacity</h5>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="row align-items-center text-center g-4">
+
+                            <div class="col-md-5">
+                                <div class="p-3 bg-light rounded-3 h-100 border">
+                                    <div class="text-primary mb-2">
+                                        <i class="bi bi-people-fill fs-1"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-dark mb-0">{{ workers|intcomma }}</h3>
+                                    <small class="text-muted text-uppercase fw-semibold ls-1">Workers</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 d-none d-md-block">
+                                <i class="bi bi-arrow-right-circle-fill fs-1 text-muted opacity-25"></i>
+                            </div>
+                            <div class="col-12 d-md-none py-0">
+                                <i class="bi bi-arrow-down-circle-fill fs-3 text-muted opacity-25"></i>
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="p-3 bg-success-subtle rounded-3 h-100 border border-success border-opacity-25">
+                                    <div class="text-success mb-2">
+                                        <i class="bi bi-box-seam-fill fs-1"></i>
+                                    </div>
+                                    <h3 class="fw-bold text-success mb-0">{{ demand|intcomma }}</h3>
+                                    <small class="text-success text-uppercase fw-semibold ls-1">Units Produced</small>
+                                </div>
+                            </div>
+
+                        </div>
+                        <hr class="my-4 opacity-10">
+
+                        <div class="text-center">
+                            <p class="mb-0 text-muted fs-5">
+                                With a workforce of <strong>{{ workers|intcomma }}</strong>, you can achieve a
+                                production output of <strong>{{ demand|intcomma }} units</strong>.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

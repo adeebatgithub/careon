@@ -62,6 +62,13 @@
                         <i class="bi bi-receipt"></i> Orders
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a href="{% url 'demand:list' %}"
+                       class="nav-link d-flex align-items-center gap-2 text-dark
+                              {% if request.resolver_match.app_name == 'demand' %}active bg-secondary text-white{% endif %}">
+                        <i class="bi bi-receipt"></i> Find Demand
+                    </a>
+                </li>
 
                 <li class="nav-item">
                     <a href="{% url 'product:list' %}"

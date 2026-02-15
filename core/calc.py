@@ -214,8 +214,8 @@ def folding(demand: int, folding_type: int):
 
     if folding_type == 1:
         return {
-            "default": next_even(calc.number_of_workers(factor=factor)),
-            "required": 24,
+            "required": next_even(calc.number_of_workers(factor=factor)),
+            "default": 24,
             "_std_time": calc.standard_time(),
         }
     return {
@@ -258,32 +258,23 @@ def number_of_workers(demand: int, nos_tie: int, folding_type: int, attached: in
     }
     return number_of_workers_activity
 
-
 def total_number_of_workers(demand: int, nos_tie: int, folding_type: int, attached: int):
     number_of_workers_activity = number_of_workers(demand, nos_tie, folding_type, attached)
-    n = 0
-    for k, v in number_of_workers_activity.items():
-        n += v.get("required")
-    return math.ceil(n)
+    total_number_of_workers_activity = {k:math.ceil(v.get("required")) for k, v in number_of_workers_activity.items()}
+    for activity in ("welcrow_attachment", "reinforcement_attachment", "tie_attachment"):
+        if activity in total_number_of_workers_activity:
+            total_number_of_workers_activity[activity] = next_even(total_number_of_workers_activity[activity])
+    return sum(total_number_of_workers_activity.values())
 
 
 if __name__ == "__main__":
     kwargs = {
-        "demand": 8000,
+        "demand": 1,
         "nos_tie": 1,
-        "folding_type": 0,
+        "folding_type": 1,
         "attached": 1,
     }
-    data = number_of_workers(**kwargs)
-    width = max(len(str(k)) for k in data)
 
-    for k, v in kwargs.items():
-        print(f"{k}: {v}")
-    print("-" * (width + 10))
-    print()
+    w1 = total_number_of_workers(**kwargs)
 
-    for k, v in data.items():
-        print(f"{k:<{width}} | {v.get('default'):<{width}} | {v.get('required')}")
-
-    print("-" * (width + 10))
-    print(f"total number of workers: {total_number_of_workers(**kwargs)}")
+    print(200/w1)

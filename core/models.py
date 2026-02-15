@@ -1,7 +1,5 @@
 from django.db import models
 
-from core.calc import total_number_of_workers
-
 
 class Products(models.Model):
     ATTACHED=1
@@ -35,6 +33,7 @@ class Products(models.Model):
 
 class Orders(models.Model):
     name = models.CharField(max_length=100)
+    is_reverse = models.BooleanField(default=False)
 
     def _get_products(self, **kwargs):
         return OrderProducts.objects.filter(order=self, **kwargs)

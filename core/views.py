@@ -90,23 +90,10 @@ class ResultView(TemplateView):
         return total
 
     def overtime(self):
-        total_std_time_product = defaultdict(float)
-        total_time = 0
-        for product in self.get_products():
-            workers = number_of_workers(
-                demand=product.demand,
-                nos_tie=product.product.ties,
-                folding_type=product.product.folding,
-                attached=product.product.reinforcement
-            )
-
-            for activity, counts in workers.items():
-                total_std_time_product[product.product.name] += counts["_std_time"]
-
-            total_time = total_time + (total_std_time_product[product.product.name] * product.demand)
-
-        print((total_time - (105 * 480)) / 105)
-        return math.ceil((total_time - (105 * 480)) / 105)
+        additional_workers = self.total_number_of_workers() - 105
+        if additional_workers > 0:
+            return math.ceil((additional_workers * 480) / 105)
+        return 0
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -115,5 +102,45 @@ class ResultView(TemplateView):
             "order": self.get_order(),
             "workers": self.total_number_of_workers_per_activity(),
             "overtime": self.overtime(),
+        })
+        return context
+
+
+class DemandResult(TemplateView):
+    template_name = "demand_result.html"
+
+    def get_order(self):
+        return get_object_or_404(Orders, pk=self.kwargs['pk'])
+
+    def get_product(self):
+        return self.get_order().products().first()
+
+    def get_mul_factor(self, activity, folding):
+        if activity == "body_cuff_cutting":
+            return 3
+        elif activity in ("welcrow_attachment", "reinforcement_attachment", "tie_attachment"):
+            return 2
+        elif activity == "folding" and folding == 1:
+            return 2
+        return 1
+
+    def get_demand(self):
+        product = self.get_product()
+        workers = number_of_workers(
+            demand=1,
+            nos_tie=product.product.ties,
+            folding_type=product.product.folding,
+            attached=product.product.reinforcement
+        )
+        total_std_time = 0
+        for activity, counts in workers.items():
+            total_std_time += (counts["_std_time"] / 480) * self.get_mul_factor(activity, product.product.folding)
+        return product.demand / total_std_time
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            "demand": round(self.get_demand()),
+            "workers": self.get_product().demand,
         })
         return context
