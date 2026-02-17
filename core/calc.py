@@ -264,7 +264,7 @@ def total_number_of_workers(demand: int, nos_tie: int, folding_type: int, attach
     for activity in ("welcrow_attachment", "reinforcement_attachment", "tie_attachment"):
         if activity in total_number_of_workers_activity:
             total_number_of_workers_activity[activity] = next_even(total_number_of_workers_activity[activity])
-    return sum(total_number_of_workers_activity.values())
+    return sum(total_number_of_workers_activity.values()), number_of_workers_activity
 
 
 if __name__ == "__main__":
@@ -276,5 +276,3 @@ if __name__ == "__main__":
     }
 
     w1 = total_number_of_workers(**kwargs)
-
-    print(200/w1)

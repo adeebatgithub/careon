@@ -127,20 +127,23 @@ class DemandResult(TemplateView):
     def get_demand(self):
         product = self.get_product()
         for n in range(1, 99999):
-            workers = total_number_of_workers(
+            workers, workers_list = total_number_of_workers(
                 demand=n,
                 nos_tie=product.product.ties,
                 folding_type=product.product.folding,
                 attached=product.product.reinforcement
             )
             if workers >= product.demand + 1:
-                return n
-        return 0
+                return n, workers_list
+        return 0, None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        workers, workers_list = self.get_demand()
         context.update({
-            "demand": round(self.get_demand()),
+            "demand": round(workers),
             "workers": self.get_product().demand,
+            "workers_list": workers_list,
+            "total_number_of_workers": self.get_product().demand
         })
         return context
